@@ -64,32 +64,10 @@ public class PageController {
         return "contact";
     }
 
-    @GetMapping("/detail/{id}")
-    public String detail(
-            @PathVariable UUID id,
-            Model model
-    ) {
-        CarResponseDetail detail = carService.getDetail(id);
-        List<CarResponse> cars = carService.getRelatedCars(id);
 
-        model.addAttribute("detail", detail);
-        model.addAttribute("relatedCars", cars);
 
-        return "detail";
-    }
-
-    @GetMapping("/service")
-    public String service(Model model) {
-        return "service";
-    }
-
-    @GetMapping("/team")
-    public String team(Model model) {
-        return "team";
-    }
-
-    @GetMapping("/testimonial")
-    public String testimonial(Model model) {
-        return "testimonial";
+    @GetMapping("/jelmayan")
+    public String jelmayan(Model model) {
+        return "jelmayan";
     }
 }
