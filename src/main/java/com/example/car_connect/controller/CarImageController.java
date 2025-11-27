@@ -19,14 +19,14 @@ import java.util.UUID;
 public class CarImageController {
     private final ImageService imageService;
 
-    @PostMapping("/upload/{carId}")
-    public CarImageResponse uploadCarImage(
-            @RequestPart List<MultipartFile> images,
-            @RequestPart MultipartFile fonImage,
-            @PathVariable UUID carId
-    ) {
-        return imageService.uploadCarImage(images, fonImage, carId);
-    }
+        @PostMapping("/upload/{carId}")
+        public CarImageResponse uploadCarImage(
+                @RequestPart List<MultipartFile> images,
+                @RequestPart MultipartFile fonImage,
+                @PathVariable UUID carId
+        ) {
+            return imageService.uploadCarImage(images, fonImage, carId);
+        }
 
     @GetMapping("/cars/{carId}")
     public List<CarImageResponse> getImages(
