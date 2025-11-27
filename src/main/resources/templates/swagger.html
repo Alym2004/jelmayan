@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JUGURUK API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+        .header {
+            background: #343a40;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #fd7e14;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>JUGURUK API Documentation</h1>
+    <p>API для управления каталогом электротехники и заказами</p>
+</div>
+
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+<script>
+    const spec = {
+        openapi: "3.0.0",
+        info: {
+            title: "JUGURUK API",
+            description: "API для сайта продажи электротехники JUGURUK",
+            version: "1.0.0",
+            contact: {
+                name: "JUGURUK Support",
+                email: "info@juguruk.com",
+                url: "https://juguruk.com"
+            },
+            license: {
+                name: "MIT",
+                url: "https://opensource.org/licenses/MIT"
+            }
+        },
+        servers: [
+            {
+                url: "https://api.juguruk.com/v1",
+                description: "Production server"
+            },
+            {
+                url: "https://dev-api.juguruk.com/v1",
+                description: "Development server"
+            }
+        ],
+        tags: [
+            {
+                name: "products",
+                description: "Операции с продуктами"
+            },
+            {
+                name: "orders",
+                description: "Операции с заказами"
+            },
+            {
+                name: "whatsapp",
+                description: "Интеграция с WhatsApp"
+            }
+        ],
+        paths: {
+            "/products": {
+                get: {
+                    tags: ["products"],
+                    summary: "Получить список продуктов",
+                    description: "Возвращает список всех доступных продуктов",
+                    parameters: [
+                        {
+                            name: "category",
+                            in: "query",
+                            description: "Фильтр по категории",
+                            required: false,
+                            schema: {
+                                type: "string",
+                                enum: ["электро", "SUV", "sedan", "coupe"]
+                            }
+                        },
+                        {
+                            name: "page",
+                            in: "query",
+                            description: "Номер страницы",
+                            required: false,
+                            schema: {
+                                type: "integer",
+                                default: 1
+                            }
+                        },
+                        {
+                            name: "limit",
+                            in: "query",
+                            description: "Количество элементов на странице",
+                            required: false,
+                            schema: {
+                                type: "integer",
+                                default: 10
+                            }
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Успешный ответ",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            products: {
+                                                type: "array",
+                                                items: {
+                                                    $ref: "#/components/schemas/Product"
+                                                }
+                                            },
+                                            total: {
+                                                type: "integer",
+                                                example: 6
+                                            },
+                                            page: {
+                                                type: "integer",
+                                                example: 1
+                                            },
+                                            limit: {
+                                                type: "integer",
+                                                example: 10
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                post: {
+                    tags: ["products"],
+                    summary: "Добавить новый продукт",
+                    description: "Создает новый продукт в каталоге",
+                    security: [
+                        {
+                            BearerAuth: []
+                        }
+                    ],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/ProductInput"
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        "201": {
+                            description: "Продукт успешно создан",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        $ref: "#/components/schemas/Product"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/products/{id}": {
+                get: {
+                    tags: ["products"],
+                    summary: "Получить продукт по ID",
+                    description: "Возвращает информацию о конкретном продукте",
+                    parameters: [
+                        {
+                            name: "id",
+                            in: "path",
+                            required: true,
+                            description: "ID продукта",
+                            schema: {
+                                type: "string"
+                            }
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Успешный ответ",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        $ref: "#/components/schemas/Product"
+                                    }
+                                }
+                            }
+                        },
+                        "404": {
+                            description: "Продукт не найден"
+                        }
+                    }
+                },
+                put: {
+                    tags: ["products"],
+                    summary: "Обновить продукт",
+                    description: "Обновляет информацию о продукте",
+                    security: [
+                        {
+                            BearerAuth: []
+                        }
+                    ],
+                    parameters: [
+                        {
+                            name: "id",
+                            in: "path",
+                            required: true,
+                            description: "ID продукта",
+                            schema: {
+                                type: "string"
+                            }
+                        }
+                    ],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/ProductInput"
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        "200": {
+                            description: "Продукт успешно обновлен",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        $ref: "#/components/schemas/Product"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                delete: {
+                    tags: ["products"],
+                    summary: "Удалить продукт",
+                    description: "Удаляет продукт из каталога",
+                    security: [
+                        {
+                            BearerAuth: []
+                        }
+                    ],
+                    parameters: [
+                        {
+                            name: "id",
+                            in: "path",
+                            required: true,
+                            description: "ID продукта",
+                            schema: {
+                                type: "string"
+                            }
+                        }
+                    ],
+                    responses: {
+                        "204": {
+                            description: "Продукт успешно удален"
+                        }
+                    }
+                }
+            },
+            "/orders": {
+                get: {
+                    tags: ["orders"],
+                    summary: "Получить список заказов",
+                    description: "Возвращает список всех заказов",
+                    security: [
+                        {
+                            BearerAuth: []
+                        }
+                    ],
+                    parameters: [
+                        {
+                            name: "status",
+                            in: "query",
+                            description: "Фильтр по статусу заказа",
+                            required: false,
+                            schema: {
+                                type: "string",
+                                enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"]
+                            }
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Успешный ответ",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            orders: {
+                                                type: "array",
+                                                items: {
+                                                    $ref: "#/components/schemas/Order"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                post: {
+                    tags: ["orders"],
+                    summary: "Создать новый заказ",
+                    description: "Создает новый заказ через WhatsApp",
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/OrderInput"
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        "201": {
+                            description: "Заказ успешно создан",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        $ref: "#/components/schemas/Order"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/whatsapp/send": {
+                post: {
+                    tags: ["whatsapp"],
+                    summary: "Отправить сообщение через WhatsApp",
+                    description: "Отправляет предварительно сформированное сообщение в WhatsApp",
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        productName: {
+                                            type: "string",
+                                            example: "Jelmayan 2023"
+                                        },
+                                        productPrice: {
+                                            type: "string",
+                                            example: "24970"
+                                        },
+                                        customerName: {
+                                            type: "string",
+                                            example: "Иван Иванов"
+                                        },
+                                        customerPhone: {
+                                            type: "string",
+                                            example: "+996555123456"
+                                        }
+                                    },
+                                    required: ["productName", "productPrice"]
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        "200": {
+                            description: "Сообщение успешно отправлено",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            success: {
+                                                type: "boolean",
+                                                example: true
+                                            },
+                                            message: {
+                                                type: "string",
+                                                example: "WhatsApp message sent successfully"
+                                            },
+                                            whatsappUrl: {
+                                                type: "string",
+                                                example: "https://wa.me/996776203384?text=Hello..."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        components: {
+            schemas: {
+                Product: {
+                    type: "object",
+                    properties: {
+                        id: {
+                            type: "string",
+                            example: "prod_001"
+                        },
+                        name: {
+                            type: "string",
+                            example: "Jelmayan 2023"
+                        },
+                        description: {
+                            type: "string",
+                            example: "Электротехника премиум класса"
+                        },
+                        price: {
+                            type: "number",
+                            example: 24970
+                        },
+                        currency: {
+                            type: "string",
+                            example: "USD"
+                        },
+                        category: {
+                            type: "string",
+                            example: "электро"
+                        },
+                        mileage: {
+                            type: "string",
+                            example: "28K mi"
+                        },
+                        badge: {
+                            type: "string",
+                            example: "New"
+                        },
+                        imageUrl: {
+                            type: "string",
+                            example: "/img/car-1.jpg"
+                        },
+                        status: {
+                            type: "string",
+                            enum: ["available", "out_of_stock", "discontinued"],
+                            example: "available"
+                        },
+                        createdAt: {
+                            type: "string",
+                            format: "date-time"
+                        },
+                        updatedAt: {
+                            type: "string",
+                            format: "date-time"
+                        }
+                    }
+                },
+                ProductInput: {
+                    type: "object",
+                    properties: {
+                        name: {
+                            type: "string",
+                            example: "Новый продукт"
+                        },
+                        description: {
+                            type: "string",
+                            example: "Описание нового продукта"
+                        },
+                        price: {
+                            type: "number",
+                            example: 19999
+                        },
+                        currency: {
+                            type: "string",
+                            example: "USD"
+                        },
+                        category: {
+                            type: "string",
+                            example: "электро"
+                        },
+                        mileage: {
+                            type: "string",
+                            example: "0 mi"
+                        },
+                        badge: {
+                            type: "string",
+                            example: "New"
+                        },
+                        imageUrl: {
+                            type: "string",
+                            example: "/img/new-product.jpg"
+                        }
+                    },
+                    required: ["name", "price", "category"]
+                },
+                Order: {
+                    type: "object",
+                    properties: {
+                        id: {
+                            type: "string",
+                            example: "order_001"
+                        },
+                        productId: {
+                            type: "string",
+                            example: "prod_001"
+                        },
+                        productName: {
+                            type: "string",
+                            example: "Jelmayan 2023"
+                        },
+                        customerName: {
+                            type: "string",
+                            example: "Иван Иванов"
+                        },
+                        customerPhone: {
+                            type: "string",
+                            example: "+996555123456"
+                        },
+                        customerEmail: {
+                            type: "string",
+                            example: "ivan@example.com"
+                        },
+                        status: {
+                            type: "string",
+                            enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+                            example: "pending"
+                        },
+                        totalAmount: {
+                            type: "number",
+                            example: 24970
+                        },
+                        currency: {
+                            type: "string",
+                            example: "USD"
+                        },
+                        createdAt: {
+                            type: "string",
+                            format: "date-time"
+                        },
+                        updatedAt: {
+                            type: "string",
+                            format: "date-time"
+                        }
+                    }
+                },
+                OrderInput: {
+                    type: "object",
+                    properties: {
+                        productId: {
+                            type: "string",
+                            example: "prod_001"
+                        },
+                        customerName: {
+                            type: "string",
+                            example: "Иван Иванов"
+                        },
+                        customerPhone: {
+                            type: "string",
+                            example: "+996555123456"
+                        },
+                        customerEmail: {
+                            type: "string",
+                            example: "ivan@example.com"
+                        },
+                        message: {
+                            type: "string",
+                            example: "Хочу заказать этот продукт"
+                        }
+                    },
+                    required: ["productId", "customerPhone"]
+                }
+            },
+            securitySchemes: {
+                BearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                }
+            }
+        }
+    };
+
+    // Инициализация Swagger UI
+    const ui = SwaggerUIBundle({
+        spec: spec,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIBundle.presets.standalone
+        ],
+        plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "BaseLayout"
+    });
+</script>
+</body>
+</html>
